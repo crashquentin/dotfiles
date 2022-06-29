@@ -1,0 +1,3 @@
+# Example of an rsync exclude file
+
+.DS_Store

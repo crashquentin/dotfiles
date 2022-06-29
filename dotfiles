@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -e
+
+# SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+DOTFILES_DIR="$HOME/.dotfiles"
+
+# rsync
+# -a, --archive archive mode; same as -rlptgoD (no -H)
+# --recursive recurse into directories
+# --links copy symlinks as symlinks
+# --verbose increase verbosity
+# --perms preserve permissions
+# --times preserve times
+# --group preserve group
+# --devices preserve device files (super-user only)
+# --specials preserve special files
+rs="rsync -av --backup --backup-dir="$DOTFILES_DIR/backup" --suffix=.bak" 
+
+SRC="$DOTFILES_DIR/src"
+DES="$HOME"
+
+# Router
+if [[ "$1" == "sync" ]]; then
+    # Write .dotfiles/src to $HOME
+    $rs "$SRC/" "$DES/"
+elif [[ "$1" == "diff" ]]; then
+    # View differences between .dotfiles/src and $HOME
+    vimdiff $2 $3
+elif [[ "$1" == "update" ]]; then
+    # Skip files that are newer on the receiver
+    $rs --update "$SRC/" "$DES/"
+elif [[ "$1" == "ignore" ]]; then
+    # Skip files that are newer on the receiver
+    # Skip updating files that already exist on receiver
+    $rs --ignore-existing "$SRC/" "$DES/"
+elif [[ "$1" == "write" ]]; then
+    # Don't skip files that match in size and mod-time
+    $rs --ignore-times "$SRC/" "$DES/"
+else
+    echo "Usage: $0 [docker|rsync]"
+    exit 1
+fi
